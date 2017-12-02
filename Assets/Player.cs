@@ -20,7 +20,14 @@ public class Player : MonoBehaviour {
 	//FixedUpdate is called at a fixed interval and is independent of frame rate. Put physics code here.
 	void FixedUpdate()
 	{
-		rb.AddForce(new Vector2(Input.GetAxis ("Horizontal") * speed, 0));
+		//rb.AddForce(new Vector2(Input.GetAxis ("Horizontal") * speed, 0));
+		if (Input.GetKeyDown (KeyCode.A)) {
+			rb.AddForce (new Vector2 (-10 * speed, 0));
+		}
+
+		if (Input.GetKeyDown (KeyCode.D)) {
+			rb.AddForce (new Vector2 (10 * speed, 0));
+		}
 
 		/*
 		//Store the current horizontal input in the float moveHorizontal.
