@@ -8,6 +8,8 @@ public class Spawner : MonoBehaviour {
 	public float spawnTime = 3f;            // How long between each spawn.
 	public Transform[] spawnPoints;         // An array of the spawn points this enemy can spawn from.
 
+	public bool spawnEnabled = true;
+
 	// Use this for initialization
 	void Start () {
 		InvokeRepeating ("Spawn", spawnTime, spawnTime);

@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Tower : MonoBehaviour {
 	public Rigidbody2D rb;
@@ -17,8 +18,26 @@ public class Tower : MonoBehaviour {
 	private float forceRight = 0;
 	private float forceLeft = 0;
 
+	private GameObject gameOverTextObj;
+	//private Text gameOverText;
+	private UnityEngine.UI.Image gameOverImage;
+
+	private GameTimer timer;
+
+	private AudioSource audioSource;
+
+	private AudioSource collapseAudioSource;
+
 	// Use this for initialization
 	void Start () {
+		timer = GameObject.Find ("Time").GetComponent<GameTimer> ();
+
+		audioSource = GameObject.Find ("Audio Source").GetComponent<AudioSource> ();
+		collapseAudioSource = GameObject.Find ("CollapseAudioSource").GetComponent<AudioSource> ();
+
+		gameOverImage = GameObject.Find ("GameOverImage").GetComponent<Image> ();
+		gameOverImage.enabled = false;
+
 		rb = GetComponent<Rigidbody2D>();
 		rb.centerOfMass = rb.centerOfMass + new Vector2(0, 0.5f);
 
@@ -29,14 +48,56 @@ public class Tower : MonoBehaviour {
 		InvokeRepeating ("ApplyForceLeft", forceLeftDelay, forceLeftInterval);
 	}
 
-	void Reset()
+	IEnumerator Reset()
+	//void Reset()
 	{
+		collapseAudioSource.Play ();
+
+		// Pause Timer
+		timer.paused = true;
+
+		// Pause music
+		audioSource.Pause ();
+
 		CancelInvoke ();
+
+		// Reset Tower
 		gameObject.transform.position = origPosition + new Vector3(0, 0.2f, 0);
 		gameObject.transform.rotation = origRotation;
 		forceRight = 0;
 		forceLeft = 0;
 		rb.Sleep ();
+
+		// Display Game Over Text
+		gameOverImage.enabled = true;
+
+		// Pause spawning of persons
+		GameObject spawnerObj = GameObject.Find ("Spawner");
+		Spawner spawner = spawnerObj.GetComponent<Spawner> ();
+		spawner.spawnEnabled = false;
+
+		// Destroy all persons
+		foreach (GameObject personObj in GameObject.FindGameObjectsWithTag("Person"))
+		{
+			Destroy (personObj);
+		}
+
+		yield return new WaitForSeconds(5);
+
+		//Time.timeScale = 1;
+
+		// Renable spawning
+		spawner.spawnEnabled = false;
+
+		// Hide gameover text
+		gameOverImage.enabled = false;
+
+		// Reset and resume timer
+		timer.Reset ();
+		timer.paused = false;
+
+		// Unpause Music
+		audioSource.Play();
 	}
 
 	// Update is called once per frame
@@ -45,7 +106,8 @@ public class Tower : MonoBehaviour {
 
 	void OnTriggerEnter2D(Collider2D other)
 	{
-		Reset();
+		StartCoroutine ("Reset");
+		///Reset();
 	}
 
 	void ApplyForceRight()
